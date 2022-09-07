@@ -27,7 +27,13 @@
            ;; See https://github.com/clojure-emacs/cider-nrepl/blob/master/deps.edn for Emacs support
            :dev       {:extra-paths ["src/test" "src/dev" "src/workspaces"]
                        :jvm-opts    ["-XX:-OmitStackTraceInFastThrow"]
-                       :extra-deps  {org.clojure/clojurescript   {:mvn/version "1.10.896"}
+                       :main-opts   ["-m" "nrepl.cmdline" "--middleware"
+                                     "[cider.nrepl/cider-middleware,cider.piggieback/wrap-cljs-repl]"
+                                     "-b" "0.0.0.0"]
+                       :extra-deps  {cider/cider-nrepl {:mvn/version "0.28.5"}
+                                     cider/piggieback {:mvn/version "0.5.3"}
+                                     mx.cider/enrich-classpath {:mvn/version "1.9.0"}
+                                     org.clojure/clojurescript   {:mvn/version "1.10.896"}
                                      thheller/shadow-cljs        {:mvn/version "2.16.12"}
                                      fulcrologic/fulcro-spec     {:mvn/version "3.1.12"}
                                      binaryage/devtools          {:mvn/version "1.0.4"}

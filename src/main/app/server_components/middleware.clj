@@ -7,6 +7,7 @@
                                                           wrap-transit-params
                                                           wrap-transit-response]]
     [ring.middleware.defaults :refer [wrap-defaults]]
+    [ring.middleware.anti-forgery :as anti-forgery]
     [ring.util.response :refer [response file-response resource-response]]
     [ring.util.response :as resp]
     [hiccup.page :refer [html5]]
@@ -89,6 +90,7 @@
         legal-origins   (get config :legal-origins #{"localhost"})]
     (-> not-found-handler
       (wrap-api "/api")
+      anti-forgery/wrap-anti-forgery
       wrap-transit-params
       wrap-transit-response
       (wrap-html-routes)
