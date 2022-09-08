@@ -5,7 +5,7 @@
            CustomResourceDefinitionList]
           io.fabric8.kubernetes.client.KubernetesClientBuilder))
 
-(def oc (k8s/client "https://api.gxmpox00.westeurope.aroapp.io:6443" {:token "sha256~upWlnfYyG-aqwg-bHbhcej5j-liL3LW_XfTPFBrUH0A"}))
+(def oc (k8s/client "https://api.gxmpox00.westeurope.aroapp.io:6443" {:token "sha256~VzGv_O6rTAXIOFQmBYq0vS1Gu56DOetqNdnVgZhJCZ4"}))
 
 ;; (k8s/explore k8s :Deployment)
 ;; (k8s/explore k8s :Deployment)

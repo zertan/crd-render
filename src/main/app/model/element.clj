@@ -40,7 +40,8 @@
         ;; (->> (get-in db [:element/id 0])
         ;;     (mapv (fn [id] {:user/id (first id)}) ))
         ]
-(log/info "called e")
+    (log/info "called e")
+    ;{:element/id id :element/text (get-in dbs/st-db )}
   r))
 
 ;; (defmutation add-top-element! [env]
@@ -53,6 +54,16 @@
   {;::pc/input [:main/element]
    ::pc/output [{:main/element [:element/id]}]}
   (log/info "asd")
-  {:main/element {:element/id 0}})
+  ;{:main/element {:element/id 0}}
+  {:main/element dbs/st-db}
+  )
+
+(defresolver add-top-element! [env]
+  {;::pc/input [:main/element]
+   ::pc/output [:main/element]}
+  (log/info "m")
+  ;{:main/element {:element/id 0}}
+  {:main/element dbs/st-db}
+  )
 
 (def resolvers [add-top-element! element-resolver])

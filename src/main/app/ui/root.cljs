@@ -140,14 +140,14 @@
 
 (defsc Root [this {:keys [:main/element] :as props}]
   {:query         [{:main/element (comp/get-query element/Element)}]
-   :initial-state (fn [_] {:main/element (comp/get-initial-state element/Element)})
+   :initial-state (fn [_] {:main/element [(comp/get-initial-state element/Element)]})
    ;; :ident         (fn [] [:component/id :main])
    :route-segment ["main"]
    :componentDidMount (fn [this]
                         ;(comp/transact! this [`(app.model.element/add-top-element! {:url "https://raw.githubusercontent.com/keycloak/keycloak-operator/main/deploy/crds/keycloak.org_keycloakrealms_crd.yaml" :tempid 123})])
                         )}
   (div :.ui.container
-       (element/ui-element element)
+       (mapv #(element/ui-element % {:c 0}) element)
        ))
 
 ;; (def ui-main (comp/factory Main))

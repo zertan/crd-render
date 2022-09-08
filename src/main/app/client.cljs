@@ -63,6 +63,8 @@
   (comp/get-query root/Root {})
   (comp/get-query root/Root (app/current-state SPA))
 
+(df/load! SPA :main/element app.ui.element/Element)
+
 (let [s (app/current-state SPA)]
   (fdn/db->tree [{ :main/element [ :element/id { :element/text [ :txt/id :txt/text ] } { :element/elements '... } ] }] {} s))
 
