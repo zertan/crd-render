@@ -3,6 +3,7 @@
     [app.model.session :as session]
     [app.model.txt :as txt]
     [app.ui.components :as my-comps]
+    [app.ui.element :as element]
     [clojure.string :as str]
     [com.fulcrologic.fulcro.dom :as dom :refer [div ul li p h3 button b]]
     [com.fulcrologic.fulcro.dom.html-entities :as ent]
@@ -137,15 +138,17 @@
 
 ;; (def ui-login (comp/factory Login))
 
-(defsc Root [this {:keys [:main/txt] :as props}]
-  {:query         [{:main/txt (comp/get-query my-comps/Text)}]
-   :initial-state (fn [_] {:main/txt (comp/get-initial-state my-comps/Text)})
+(defsc Root [this {:keys [:main/element] :as props}]
+  {:query         [{:main/element (comp/get-query element/Element)}]
+   :initial-state (fn [_] {:main/element (comp/get-initial-state element/Element)})
    ;; :ident         (fn [] [:component/id :main])
    :route-segment ["main"]
    :componentDidMount (fn [this]
-                        (comp/transact! this [`(app.model.txt/add-txt! {:url "https://raw.githubusercontent.com/keycloak/keycloak-operator/main/deploy/crds/keycloak.org_keycloakrealms_crd.yaml"})]))}
-  (div :.ui.container.segment
-       (my-comps/ui-text txt)))
+                        ;(comp/transact! this [`(app.model.element/add-top-element! {:url "https://raw.githubusercontent.com/keycloak/keycloak-operator/main/deploy/crds/keycloak.org_keycloakrealms_crd.yaml" :tempid 123})])
+                        )}
+  (div :.ui.container
+       (element/ui-element element)
+       ))
 
 ;; (def ui-main (comp/factory Main))
 

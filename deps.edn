@@ -18,13 +18,27 @@
            datascript/datascript               {:mvn/version "0.18.7"}
 
            ring/ring-core                      {:mvn/version "1.8.1"}
-           ring/ring-defaults                  {:mvn/version "0.3.2"}}
+           ring/ring-defaults                  {:mvn/version "0.3.2"}
+           
+           io.fabric8/kubernetes-client        {:mvn/version "6.1.1"}
+           nubank/k8s-api {:mvn/version "0.1.2"}}
 
  :aliases {:clj-tests {:extra-paths ["src/test"]
                        :main-opts   ["-m" "kaocha.runner"]
                        :extra-deps  {lambdaisland/kaocha {:mvn/version "1.60.977"}}}
 
-           ;; See https://github.com/clojure-emacs/cider-nrepl/blob/master/deps.edn for Emacs support
+           :dev-cljs       {:extra-paths ["src/test" "src/dev" "src/workspaces"]
+                            :jvm-opts    ["-XX:-OmitStackTraceInFastThrow"]
+                            :extra-deps  {cider/cider-nrepl {:mvn/version "0.28.5"}
+                                          cider/piggieback {:mvn/version "0.5.3"}
+                                          mx.cider/enrich-classpath {:mvn/version "1.9.0"}
+                                          org.clojure/clojurescript   {:mvn/version "1.10.896"}
+                                          thheller/shadow-cljs        {:mvn/version "2.16.12"}
+                                          fulcrologic/fulcro-spec     {:mvn/version "3.1.12"}
+                                          binaryage/devtools          {:mvn/version "1.0.4"}
+                                          com.github.awkay/workspaces {:mvn/version "1.0.3"},
+                                          org.clojure/tools.namespace {:mvn/version "1.0.0"}}}
+           
            :dev       {:extra-paths ["src/test" "src/dev" "src/workspaces"]
                        :jvm-opts    ["-XX:-OmitStackTraceInFastThrow"]
                        :main-opts   ["-m" "nrepl.cmdline" "--middleware"

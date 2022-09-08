@@ -3,7 +3,8 @@
   [clojure.tools.namespace.repl :as tools-ns :refer [set-refresh-dirs]]
   [mount.core :as mount]
   ;; this is the top-level dependent component...mount will find the rest via ns requires
-  [app.server-components.http-server :refer [http-server]]))
+  [app.server-components.http-server :refer [http-server]]
+  [shadow.cljs.devtools.server :as server]))
 
 (defn start
   "Start the web server"
@@ -25,6 +26,11 @@
   (stop)
   (tools-ns/refresh :after 'development/start))
 
+(defn start-shadow []
+  (server/start!))
+
 (comment
   (start)
+  (start-shadow)
+  (server/stop!)
   (restart))

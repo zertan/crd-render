@@ -1,4 +1,4 @@
-{:deps   {:aliases [:dev]}
+{:deps   {:aliases [:dev-cljs]}
  :nrepl  {:port 9000
           :host "0.0.0.0"}
  :builds {:main       {:target     :browser

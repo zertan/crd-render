@@ -25,7 +25,9 @@
     (if (= uri (:uri request))
       (handle-api-request
         (:transit-params request)
-        (fn [tx] (parser {:ring/request request} tx)))
+        (fn [tx] (let [res (parser {:ring/request request} tx)]
+                     ;(log/info res)
+                      res)))
       (handler request))))
 
 ;; ================================================================================

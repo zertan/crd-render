@@ -2,6 +2,8 @@
   (:require
     [app.application :refer [SPA]]
     [app.ui.root :as root]
+    [app.model.element :as ele]
+    [app.ui.element :as elem]
     [com.fulcrologic.fulcro.application :as app]
     [app.ui.root :as root]
     [com.fulcrologic.fulcro.networking.http-remote :as net]
@@ -14,7 +16,8 @@
     [com.fulcrologic.fulcro.algorithms.denormalize :as fdn]
     [com.fulcrologic.fulcro.algorithms.merge :as merge]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
-    [com.fulcrologic.fulcro.inspect.inspect-client :as inspect]))
+    [com.fulcrologic.fulcro.inspect.inspect-client :as inspect]
+    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]))
 
 (defn ^:export refresh []
   (log/info "Hot code Remount")
@@ -44,6 +47,7 @@
   (reset! (::app/state-atom SPA) {})
 
   (comp/transact! SPA [`(app.model.txt/add-txt! {:url "https://raw.githubusercontent.com/keycloak/keycloak-operator/main/deploy/crds/keycloak.org_keycloakrealms_crd.yaml"})])
+  (comp/transact! SPA [`(app.model.element/add-top-element! {:url "https://raw.githubusercontent.com/keycloak/keycloak-operator/main/deploy/crds/keycloak.org_keycloakrealms_crd.yaml" :tempid (tempid/tempid)})])
 
   (comp/get-query root/Settings (app/current-state SPA))
 
@@ -58,6 +62,12 @@
   (app/mount! SPA root/Root "app")
   (comp/get-query root/Root {})
   (comp/get-query root/Root (app/current-state SPA))
+
+(let [s (app/current-state SPA)]
+  (fdn/db->tree [{ :main/element [ :element/id { :element/text [ :txt/id :txt/text ] } { :element/elements '... } ] }] {} s))
+
+(let [s (app/current-state SPA)]
+  (fdn/db->tree [{ :main/element [ :element/id { :element/text [ :txt/id :txt/text ] } ] }] (comp/get-initial-state app.ui.root/Root {}) s))
 
   (-> SPA ::app/runtime-atom deref ::app/indexes)
   (comp/class->any SPA root/Root)

@@ -1,8 +1,9 @@
-(ns app.model.txt
+(ns app.model.element
   (:require
    [app.model.mock-database :as dbs :refer [db]]
     [datascript.core :as d]
     [com.fulcrologic.guardrails.core :refer [>defn => | ?]]
+    [com.wsscode.pathom.core :as p]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [taoensso.timbre :as log]
     [clojure.spec.alpha :as s]))
@@ -29,19 +30,29 @@
 ;;   [any? uuid? vector? => (? map?)]
 ;;   (d/pull db subquery [:txt/id id]))
 
-(defonce txt-database (atom {}))
+;(defonce txt-database (atom {}))
 
-(defresolver txt-resolver [env {:keys [txt/id]}]
-  {::pc/input  #{:txt/id}
-   ::pc/output [:txt/id :txt/text]}
-  (log/info "txt")
-  (get-in db [:txt/id id]))
+(defresolver element-resolver [env {:keys [element/id]}]
+  {::pc/input  #{:element/id}
+   ::pc/output [:element/id :element/text :element/elements]}
+  (let [r
+        (get-in db [:element/id id])
+        ;; (->> (get-in db [:element/id 0])
+        ;;     (mapv (fn [id] {:user/id (first id)}) ))
+        ]
+(log/info "called e")
+  r))
 
-;(get-in db [:txt/id 0])
+;; (defmutation add-top-element! [env]
+;;   {;::pc/input [:main/element]
+;;    ::pc/output [:main/element]}
+;;   (log/info "asd")
+;;   {:main/element [:element/id 0]})
 
-(defmutation add-txt! [env {:keys [url]}]
-  {}
-  (swap! update txt-database conj {:txt/id 1 :txt/text (slurp url)})
-  {})
+(defresolver add-top-element! [env]
+  {;::pc/input [:main/element]
+   ::pc/output [{:main/element [:element/id]}]}
+  (log/info "asd")
+  {:main/element {:element/id 0}})
 
-(def resolvers [txt-resolver add-txt!])
+(def resolvers [add-top-element! element-resolver])
