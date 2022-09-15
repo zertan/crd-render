@@ -11,6 +11,7 @@
     [ring.util.response :refer [response file-response resource-response]]
     [ring.util.response :as resp]
     [hiccup.page :refer [html5]]
+    [ring.middleware.reload :refer [wrap-reload]]
     [taoensso.timbre :as log]))
 
 (def ^:private not-found-handler
@@ -100,4 +101,5 @@
       ;; the defaults-config here (which comes from an EDN file, so it can't have
       ;; code initialized).
       ;; E.g. (wrap-defaults (assoc-in defaults-config [:session :store] (my-store)))
-      (wrap-defaults defaults-config))))
+      (wrap-defaults defaults-config)
+      wrap-reload)))

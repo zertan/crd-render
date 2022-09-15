@@ -9,6 +9,7 @@
     [app.model.account :as acct]
     [app.model.session :as session]
     [app.model.txt :as txt]
+    [app.model.main :as main]
     [app.model.element :as element]
     [app.server-components.config :refer [config]]
     [app.model.mock-database :as db]))
@@ -21,7 +22,7 @@
      (update ::pc/index-resolvers #(into {} (map (fn [[k v]] [k (dissoc v ::pc/resolve)])) %))
      (update ::pc/index-mutations #(into {} (map (fn [[k v]] [k (dissoc v ::pc/mutate)])) %)))})
 
-(def all-resolvers [acct/resolvers session/resolvers index-explorer txt/resolvers element/resolvers])
+(def all-resolvers [acct/resolvers session/resolvers index-explorer txt/resolvers element/resolvers main/resolvers])
 
 (defn preprocess-parser-plugin
   "Helper to create a plugin that can view/modify the env/tx of a top-level request.

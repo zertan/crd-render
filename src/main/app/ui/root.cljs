@@ -3,7 +3,7 @@
     [app.model.session :as session]
     [app.model.txt :as txt]
     [app.ui.components :as my-comps]
-    [app.ui.element :as element]
+    [app.model.main :as main]
     [clojure.string :as str]
     [com.fulcrologic.fulcro.dom :as dom :refer [div ul li p h3 button b]]
     [com.fulcrologic.fulcro.dom.html-entities :as ent]
@@ -138,17 +138,14 @@
 
 ;; (def ui-login (comp/factory Login))
 
-(defsc Root [this {:keys [:main/element] :as props}]
-  {:query         [{:main/element (comp/get-query element/Element)}]
-   :initial-state (fn [_] {:main/element [(comp/get-initial-state element/Element)]})
-   ;; :ident         (fn [] [:component/id :main])
-   :route-segment ["main"]
-   :componentDidMount (fn [this]
-                        ;(comp/transact! this [`(app.model.element/add-top-element! {:url "https://raw.githubusercontent.com/keycloak/keycloak-operator/main/deploy/crds/keycloak.org_keycloakrealms_crd.yaml" :tempid 123})])
-                        )}
-  (div :.ui.container
-       (mapv #(element/ui-element % {:c 0}) element)
-       ))
+(defsc Root [this {:keys [:root/main] :as props}]
+  {:query         [{:root/main (comp/get-query main/Main)}]
+   ;:ident         (fn [] [:component/id :settings])
+   ;:route-segment ["settings"]
+   :initial-state (fn [_] {:root/main (comp/get-initial-state main/Main)})}
+  (div {:className  "ui container segment"
+        :style {:background-color "#e4e7ed"}}
+    (main/ui-main main)))
 
 ;; (def ui-main (comp/factory Main))
 

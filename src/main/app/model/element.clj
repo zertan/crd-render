@@ -1,6 +1,7 @@
 (ns app.model.element
   (:require
    [app.model.mock-database :as dbs :refer [db]]
+   [app.util.k8s :as k8s]
     [datascript.core :as d]
     [com.fulcrologic.guardrails.core :refer [>defn => | ?]]
     [com.wsscode.pathom.core :as p]
@@ -32,17 +33,17 @@
 
 ;(defonce txt-database (atom {}))
 
-(defresolver element-resolver [env {:keys [element/id]}]
-  {::pc/input  #{:element/id}
-   ::pc/output [:element/id :element/text :element/elements]}
-  (let [r
-        (get-in db [:element/id id])
-        ;; (->> (get-in db [:element/id 0])
-        ;;     (mapv (fn [id] {:user/id (first id)}) ))
-        ]
-    (log/info "called e")
-    ;{:element/id id :element/text (get-in dbs/st-db )}
-  r))
+;; (defresolver element-resolver [env {:keys [element/id]}]
+;;   {::pc/input  #{:element/id}
+;;    ::pc/output [:element/id :element/text :element/elements]}
+;;   (let [r
+;;         (get-in db [:element/id id])
+;;         ;; (->> (get-in db [:element/id 0])
+;;         ;;     (mapv (fn [id] {:user/id (first id)}) ))
+;;         ]
+;;     (log/info "called e")
+;;     ;{:element/id id :element/text (get-in dbs/st-db )}
+;;   r))
 
 ;; (defmutation add-top-element! [env]
 ;;   {;::pc/input [:main/element]
@@ -50,20 +51,24 @@
 ;;   (log/info "asd")
 ;;   {:main/element [:element/id 0]})
 
-(defresolver add-top-element! [env]
-  {;::pc/input [:main/element]
-   ::pc/output [{:main/element [:element/id]}]}
-  (log/info "asd")
+;; (defresolver add-top-element! [env]
+;;   {;::pc/input [:main/element]
+;;    ::pc/output [{:main/element [:element/id]}]}
+;;   (log/info "asd")
+;;   ;{:main/element {:element/id 0}}
+;;   {:main/element dbs/st-db}
+;;   )
+
+(defresolver add-top-element! [env {:keys [element/id]}]
+  {::pc/input #{:element/id}
+   ::pc/output [:element/id :element/text :element/elements]
+   }
+  (log/info "id: " id)
   ;{:main/element {:element/id 0}}
-  {:main/element dbs/st-db}
+  (second (dbs/parse-st-at (k8s/get-crd k8s/crds id) 0 20)) ;dbs/st-db
+   
   )
 
-(defresolver add-top-element! [env]
-  {;::pc/input [:main/element]
-   ::pc/output [:main/element]}
-  (log/info "m")
-  ;{:main/element {:element/id 0}}
-  {:main/element dbs/st-db}
-  )
+;(first (dbs/parse-st-at (k8s/get-crd k8s/crds "KeycloakClient") 0 20))
 
-(def resolvers [add-top-element! element-resolver])
+(def resolvers [add-top-element!])

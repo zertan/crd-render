@@ -23,14 +23,9 @@
 ;;                                                               :target (targeting/append-to [:main/element])
 ;;                                         })
 
-(defmutation add-top-element!
-  "Client Mutation: Upsert a user (full-stack. see CLJ version for server-side)."
-  [{:keys [url tempid]}]
+(defmutation add-top-element! [{:keys [:element/id]}]
   (action [{:keys [app state]}]
-          (println "yes")
-          (df/load! app :main/element app.ui.element/Element {
-                                                              :target (targeting/replace-at :main/element)
-                                        })
+          (df/load! app [:element/id id] app.ui.element/Element {:target (targeting/replace-at [:component/id :main :main/element])})
           ;(merge/merge-component! app element/Element (comp/get-initial-state element/Element {:id tempid :text "abcd" :elements []}))
 )
   ;; (action [{:keys [state]}]

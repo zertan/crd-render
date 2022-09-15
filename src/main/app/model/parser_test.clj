@@ -8,7 +8,11 @@
     [com.wsscode.pathom.core :as p]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [taoensso.timbre :as log]
-    [clojure.spec.alpha :as s]))
+    [clojure.spec.alpha :as s]
+    [spec-provider.provider :as sp]
+    [com.fulcrologic.fulcro.algorithms.server-render :as sr]
+    [com.fulcrologic.fulcro.components :as comp]
+    [app.ui.element :as elem]))
 
 (def resolvers [ele/resolvers txt/resolvers])
 
@@ -28,14 +32,18 @@
 
 
 
-(parser {} [{:main/element [{:element/text [:txt/text]}]}])
+;; (parser {} [{:main/element [{:element/text [:txt/text]}]}])
 
-(parser {} [[:element/id 0]])
+;; (parser {} [[:element/id 0]])
 
-(parser {} [{[:element/id 1] [{:element/text [:txt/id :txt/text]}]}])
-
-
-(parser {} [{:main/element [:element/id {:element/text [:txt/id :txt/text]} {:element/elements '...}]}])
+;; (parser {} [{[:element/id 1] [{:element/text [:txt/id :txt/text]}]}])
 
 
-(parser {} [{ :main/element [ :element/id { :element/text [ :txt/id :txt/text ] } { :element/elements '... } ] }] )
+;; (parser {} [{:main/element [:element/id {:element/text [:txt/id :txt/text]} {:element/elements '...}]}])
+
+
+;; (parser {} [{ :main/element [ :element/id { :element/text [ :txt/id :txt/text ] } { :element/elements '... } ] }] )
+
+;; (def server-state (sr/build-initial-state (nth dbs/st-db 7) app.ui.element/Element))
+
+

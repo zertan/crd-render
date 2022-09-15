@@ -6,8 +6,8 @@
    [kubernetes-api.core :as k8sc]
    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
    [app.util.k8s :as k8s :refer [oc]]
-    [datascript.core :as d]
-    [mount.core :refer [defstate]]))
+   [datascript.core :as d]
+   [mount.core :refer [defstate]]))
 
 ;; In datascript just about the only thing that needs schema
 ;; is lookup refs and entity refs.  You can just wing it on
@@ -19,7 +19,7 @@
 
 (defstate conn :start (new-database))
 
-(def st (k8sc/invoke k8s/oc {:kind :CustomResourceDefinition :action :get :request {:name "keycloakrealms.keycloak.org"}}))
+;; (def st (k8sc/invoke k8s/oc {:kind :CustomResourceDefinition :action :get :request {:name "keycloakrealms.keycloak.org"}}))
 
 ;; let [st (or st (get-in (:openAPIV3Schema (:schema (first (get-in st [:spec :versions])))) [:properties :spec :properties :realm :properties]))
 ;;         id (or id 0)
@@ -53,7 +53,6 @@
     ;java.lang.Long st
     {:element/id (tempid/tempid)
      :element/text (str st)}))))
-
 
 (defn flatten-one-level [coll]  
   (mapcat  #(if (sequential? %) % [%]) coll))
@@ -105,11 +104,14 @@
                    :txt/text "b"}]
          })
 
-(def st-db (parse-st (get-in (:openAPIV3Schema (:schema (first (get-in st [:spec :versions])))) [:properties :spec :properties :realm :properties])))
+;; (def st-db (parse-st (get-in (:openAPIV3Schema (:schema (first (get-in st [:spec :versions])))) [:properties :spec :properties :realm :properties])))
 
-(def st-db (parse-st st))
+;; (def st-db (parse-st st))
 
-(def st-db (parse-st-at st 0 1000))
+;;(def st-db (parse-st-at st 0 20))
 
-;(get-in db [:element/id 1])
+
+
+                                        ;(get-in db [:element/id 1])
+
 
