@@ -4,6 +4,7 @@
     [app.ui.root :as root]
     [app.model.element :as ele]
     [app.ui.element :as elem]
+    [app.model.property :as property]
     [com.fulcrologic.fulcro.application :as app]
     [app.ui.root :as root]
     [com.fulcrologic.fulcro.networking.http-remote :as net]
@@ -62,6 +63,13 @@
   (app/mount! SPA root/Root "app")
   (comp/get-query root/Root {})
   (comp/get-query root/Root (app/current-state SPA))
+
+;;;;;;;;;;
+(comp/transact! SPA `[(app.model.property/get-crd! {:crd/id "APIManager"})])
+
+(comp/transact! SPA `[(app.model.property/get-property {:property/id #uuid "4ee79b45-08c7-4054-9a4b-05799e1c41d9"})])
+;;;;;;;;;
+
 
 (df/load! SPA :main/element app.ui.element/Element)
 

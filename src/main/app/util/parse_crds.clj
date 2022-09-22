@@ -2,21 +2,17 @@
 (:require [app.util.k8s :as k8s :refer [crds]]
           [clojure.spec.alpha :as s]
           [spec-provider.provider :as sp]
-          [com.fulcrologic.fulcro.algorithms.tempid :as tempid]))
+          [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
+          [com.fulcrologic.fulcro.algorithms.server-render :as server-render]))
+
+(defn get-version-name [crd]
+  (-> crd (:spec) (:versions) (first) (:name)))
 
 (defn get-schema [crd]
   (-> crd (:spec) (:versions) (first) (:schema) (:openAPIV3Schema) (:properties) (:spec)))
 
 (defn keep-required [schema-spec]
   )
-
-(defn parse-cr [cr]
-  {:cre/keyword 
-   :cre/required []
-   :cre/properties []
-   :cre/type #{:object :string :float64}
-   :cre/description
-   })
 
 (defn select-walker-t [afn ds]
   (filter #(and (not (coll? %)) (afn %))
@@ -37,7 +33,7 @@
 (s/def :property/format string?)
 
 
-(s/def :cr/property (s/keys :req-un [:property/id :property/name :property/type]
+(s/def :cr/property (s/keys :req-un [:property/id :property/name :property/type :property/description]
                             :opt-un [:property/required :property/items :property/format :property/properties]))
 
 (def test-prop {:id (tempid/tempid)
@@ -47,7 +43,7 @@
                 :type "integer",
                 :format "int64"})
 
-(s/conform :cr/property test-prop)
+;(s/conform :cr/property test-prop)
 
 (defn convert-to-vec [m]
   (let [k (keys m)
@@ -69,21 +65,34 @@
     ;java.lang.Long st
     nil))
 
+(defn map->nsmap
+  [m n]
+  (reduce-kv (fn [acc k v]
+               (let [new-kw (if (and (keyword? k)
+                                     (not (qualified-keyword? k)))
+                              (keyword (str n) (name k))
+                              k) ]
+                 (assoc acc new-kw v)))
+             {} m))
 
-(defn parse-cr [e & name]
-  (let [property
-        {:id (tempid/tempid)
-         :name (or name "spec")
-         :type (:type e)
-         :description (:description e)
-         :required (:required e)}]
-   (if (contains? e :properties)
-    (let [k (keys (:properties e))
-          v (vals (:properties e))]
-      (conj property {:properties (mapv #(parse-cr (nth v %) (nth k %)) (range (count k)))}))
-      property)))
+(defn parse-cr [e & {:keys [name]}]
+  (map->nsmap
+   (-> e
+       (conj {:id (tempid/uuid)
+              :name name})
+       (conj
+        (if (contains? e :properties)
+        (let [k (keys (:properties e))
+              v (vals (:properties e))]
+          {:properties (mapv #(parse-cr (nth v %) {:name (nth k %)}) (range (count k)))})))) 'property))
 
-
+(defn build-crd-data [crd-string comp]
+  (let [parsed (parse-cr (get-schema (k8s/get-crd k8s/crds crd-string)) {:name :spec})
+        init-state (server-render/build-initial-state {:property/id "blah" :property/properties parsed} comp)
+        crd-top-prop (:property/id parsed)]
+    {:crd {:crd/id crd-string
+           :crd/property [:property/id crd-top-prop]}
+     :properties (vec (vals (:property/id init-state)))}))
 
 ;; (s/def :spec/id tempid/tempid?)
 ;; (s/def :spec/name #(= % :spec))
@@ -95,7 +104,16 @@
 ;(s/def :cr/cr ())
 
 
+(comment
+
+(let [parsed (parse-cr (get-schema (k8s/get-crd k8s/crds "APIManager")) {:name :spec})
+      ids (:property/id (server-render/build-initial-state {:property/id "blah" :property/properties parsed}  app.model.property/Property))
+      top-p (:property/id parsed)]
+ids
+(get ids top-p)
+)
 
 ;; (sp/infer-specs (flatten (get-schema (k8s/get-crd k8s/crds "Application"))) :cre)
 
 ;; (filter #(keyword (first %)) :properties )
+)

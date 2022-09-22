@@ -12,8 +12,18 @@
 ;; In datascript just about the only thing that needs schema
 ;; is lookup refs and entity refs.  You can just wing it on
 ;; everything else.
-(def schema {:account/id {:db/cardinality :db.cardinality/one
-                          :db/unique      :db.unique/identity}})
+(def schema {:property/id {:db/cardinality :db.cardinality/one
+                           :db/unique      :db.unique/identity}
+             :property/properties {:db/cardinality :db.cardinality/many
+                                   :db/valueType :db.type/ref
+                                   :db/isComponent true
+                                   }
+             :crd/id      {:db/cardinality :db.cardinality/one
+                           :db/unique      :db.unique/identity}
+             :crd/property {:db/cardinality :db.cardinality/one
+                            :db/valueType :db.type/ref
+                            :db/isComponent true
+                            }})
 
 (defn new-database [] (d/create-conn schema))
 

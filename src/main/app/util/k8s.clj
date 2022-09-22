@@ -23,7 +23,7 @@
   (first (filter #(= name (-> % (:spec) (:names) (:kind))) crds)))
 
 
-(defstate oc :start (k8s/client "https://api.gxmpox00.westeurope.aroapp.io:6443" {:token "sha256~Kljzi3Zxx1NrhuPLN9kcHWCSxLnh3VB84ZZrJQxQ_s4"}))
+(defstate oc :start (k8s/client "https://api.gxmpox00.westeurope.aroapp.io:6443" {:token "sha256~gc-c0a2dZYkBbiN3mrULbU-1c_jkRZnwbGaVS-F99ok"}))
 
 (defstate crds :start (get-crds oc))
 

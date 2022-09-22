@@ -5,7 +5,7 @@
    #?(:clj
       [app.util.k8s :as k8s :refer [oc]])
     [taoensso.timbre :as log]
-    [app.ui.element :as element]
+    [app.model.property :as property]
     [com.wsscode.pathom.connect :as pc :refer [defresolver]]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
@@ -20,19 +20,25 @@
 
 #?(:cljs
    (do
+   (defsc Crd [this {:keys [:crd/id :crd/group :crd/top-property]}]
+     {:query         [:crd/id :crd/group
+                      {:crd/top-property (comp/get-query property/Property)}]
+      :initial-state (fn [_] {:crd/group ""
+                              :group/crds []})})
+
    (defsc Crds [this {:keys [:crd/group :group/crds] :as props}]
      {:query         [:crd/group :group/crds]
       :initial-state (fn [_] {:crd/group ""
                               :group/crds []})}
      (dom/text crds))
 
-   (defsc Main [this {:keys [:main/element :main/crd-groups :main/crds] :as props}]
+   (defsc Main [this {:keys [:main/property :main/crd-groups :main/crds] :as props}]
      {:query         [{:main/crds (comp/get-query Crds)}
                       :main/crd-groups
-                      {:main/element (comp/get-query element/Element)}]
+                      {:main/property (comp/get-query property/Property)}]
       :initial-state (fn [_] {:main/crds []
                               :main/crd-groups []
-                              :main/element [(comp/get-initial-state element/Element)]})
+                              :main/property [(comp/get-initial-state property/Property)]})
       :initLocalState (fn [this props]
                         {:selected-group nil
                          :selected-crd nil})
@@ -56,10 +62,13 @@
                         :selection true
                         :options (mapv (fn [x] {:text x :value x :key x}) (:group/crds crds))
                         :onChange (fn [e]
-                                    (println e)
                                     (comp/set-state! this {:selected-crd (str e.target.textContent)})
-                                    (comp/transact! this `[(app.model.element/add-top-element! {:element/id ~(str e.target.textContent)})]))})
-          (element/ui-element element {:c 0})))
+                                    (comp/transact! this `[(app.model.property/get-crd! {:crd/id ~(str e.target.textContent)})])
+                                    (println property)
+                                    )})
+          (dom/div
+           (dom/text (str "apiVersion: " (comp/get-state this :selected-group) "/" (comp/get-state this :selected-crd)))
+           (property/ui-property property {:c 0}))))
 
    (def ui-main (comp/computed-factory Main))))
 
@@ -88,9 +97,23 @@
    :cljs
    (defmutation add-crds! [{:keys [:crd/group]}]
      (action [{:keys [app state]}]
-             (println "u " group)
              (df/load! app [:crd/group group] Crds {:target (targeting/replace-at [:component/id :main :main/crds])}))
      ))
+
+;; #?(:clj
+;;    (defresolver get-required [env {:keys [:property/id]}]
+;;      {::pc/input  #{:property/id}
+;;       ::pc/output [:property/required :group/crds ;:crd/group :crd/id :crd/name
+;;                    ]}
+;;      (log/info "add-crds!")
+;;      {:crd/group group :group/crds (k8s/get-crds-in-group k8s/crds group)})
+;;    :cljs
+;;    (defmutation add-crds! [{:keys [:crd/group]}]
+;;      (action [{:keys [app state]}]
+;;              (df/load! app [:crd/group group] Crds {:target (targeting/replace-at [:component/id :main :main/crds])}))
+;;      ))
+
+
 
 #?(:clj
    (def resolvers [add-crd-groups! add-crds!]))

@@ -7,6 +7,7 @@
                                                           wrap-transit-params
                                                           wrap-transit-response]]
     [ring.middleware.defaults :refer [wrap-defaults]]
+    [ring.middleware.cors :refer [wrap-cors]]
     [ring.middleware.anti-forgery :as anti-forgery]
     [ring.util.response :refer [response file-response resource-response]]
     [ring.util.response :as resp]
@@ -93,7 +94,7 @@
         legal-origins   (get config :legal-origins #{"localhost"})]
     (-> not-found-handler
       (wrap-api "/api")
-      anti-forgery/wrap-anti-forgery
+      ;anti-forgery/wrap-anti-forgery
       wrap-transit-params
       wrap-transit-response
       (wrap-html-routes)
@@ -102,4 +103,5 @@
       ;; code initialized).
       ;; E.g. (wrap-defaults (assoc-in defaults-config [:session :store] (my-store)))
       (wrap-defaults defaults-config)
+      (wrap-cors :access-control-allow-origin [#".*"] :access-control-allow-methods [:get])
       wrap-reload)))
