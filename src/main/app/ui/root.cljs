@@ -1,8 +1,5 @@
 (ns app.ui.root
   (:require
-    [app.model.session :as session]
-    [app.model.txt :as txt]
-    [app.ui.components :as my-comps]
     [app.model.main :as main]
     [clojure.string :as str]
     [com.fulcrologic.fulcro.dom :as dom :refer [div ul li p h3 button b]]

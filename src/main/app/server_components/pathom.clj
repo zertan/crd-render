@@ -6,14 +6,10 @@
     [com.wsscode.pathom.core :as p]
     [com.wsscode.common.async-clj :refer [let-chan]]
     [clojure.core.async :as async]
-    [app.model.account :as acct]
-    [app.model.session :as session]
-    [app.model.txt :as txt]
     [app.model.main :as main]
-    [app.model.element :as element]
     [app.model.property :as property]
     [app.server-components.config :refer [config]]
-    [app.model.mock-database :as db]))
+    [app.model.database :as db]))
 
 (pc/defresolver index-explorer [env _]
   {::pc/input  #{:com.wsscode.pathom.viz.index-explorer/id}
@@ -23,7 +19,7 @@
      (update ::pc/index-resolvers #(into {} (map (fn [[k v]] [k (dissoc v ::pc/resolve)])) %))
      (update ::pc/index-mutations #(into {} (map (fn [[k v]] [k (dissoc v ::pc/mutate)])) %)))})
 
-(def all-resolvers [acct/resolvers session/resolvers index-explorer txt/resolvers element/resolvers main/resolvers property/resolvers])
+(def all-resolvers [index-explorer  main/resolvers property/resolvers])
 
 (defn preprocess-parser-plugin
   "Helper to create a plugin that can view/modify the env/tx of a top-level request.

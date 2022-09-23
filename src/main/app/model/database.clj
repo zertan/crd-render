@@ -1,7 +1,4 @@
-(ns app.model.mock-database
-  "This is a mock database implemented via Datascript, which runs completely in memory, has few deps, and requires
-  less setup than Datomic itself.  Its API is very close to Datomics, and for a demo app makes it possible to have the
-  *look* of a real back-end without having quite the amount of setup to understand for a beginner."
+(ns app.model.database
   (:require
    [kubernetes-api.core :as k8sc]
    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
@@ -12,29 +9,30 @@
 ;; In datascript just about the only thing that needs schema
 ;; is lookup refs and entity refs.  You can just wing it on
 ;; everything else.
-(def schema {:property/id {:db/cardinality :db.cardinality/one
-                           :db/unique      :db.unique/identity}
-             :property/properties {:db/cardinality :db.cardinality/many
-                                   :db/valueType :db.type/ref
-                                   :db/isComponent true
-                                   }
-             :crd/id      {:db/cardinality :db.cardinality/one
-                           :db/unique      :db.unique/identity}
-             :crd/property {:db/cardinality :db.cardinality/one
-                            :db/valueType :db.type/ref
-                            :db/isComponent true
-                            }})
+(def schema {:property/id          {:db/cardinality          :db.cardinality/one
+                                    :db/unique               :db.unique/identity}
 
-(defn new-database [] (d/create-conn schema))
+             :property/properties  {:db/cardinality          :db.cardinality/many
+                                    :db/valueType            :db.type/ref
+                                    :db/isComponent          true}
 
-(defstate conn :start (new-database))
+             :property/items       {:db/cardinality          :db.cardinality/many
+                                    :db/valueType            :db.type/ref
+                                    :db/isComponent          true}
 
-;; (def st (k8sc/invoke k8s/oc {:kind :CustomResourceDefinition :action :get :request {:name "keycloakrealms.keycloak.org"}}))
+             :crd/id               {:db/cardinality          :db.cardinality/one
+                                    :db/unique               :db.unique/identity}
 
-;; let [st (or st (get-in (:openAPIV3Schema (:schema (first (get-in st [:spec :versions])))) [:properties :spec :properties :realm :properties]))
-;;         id (or id 0)
-;;         ;db (or db {:element/id []})
-;;         ]
+             :crd/property         {:db/cardinality          :db.cardinality/one
+                                    :db/valueType            :db.type/ref
+                                    :db/isComponent          true}
+
+             :crd-group/id         {:db/cardinality          :db.cardinality/one
+                                    :db/unique               :db.unique/identity}})
+
+(defn new-database [schema] (d/create-conn schema))
+
+(defstate conn :start (new-database schema))
 
 (defn drop-nil [m]
   (apply merge (for [[k v] m :when (not (nil? v))] {k v})))
@@ -96,32 +94,3 @@
   (loop [graph graph]
     (if (every? keyword? graph) graph
       (recur (into graph (flatten (seq (first (filter #(not (keyword? %)) graph)))))))))
-
-(defn drop-at [st at]
-  )
-
-(def db {:element/id  [{:element/id 0
-                        :element/text {:txt/id 0}
-                        :element/elements [{:element/id 1}]
-                        }
-                       {:element/id 1
-                        :element/text {:txt/id 1}
-                        :element/elements nil ;(k8sc/invoke k8s/oc {:kind :CustomResourceDefinition :action :get :request {:name "keycloakrealms.keycloak.org"}})
-                        }]
-         :txt/id [{:txt/id 0
-                   :txt/text "basdaaaaa"}
-                  {:txt/id 1
-                   :txt/text "b"}]
-         })
-
-;; (def st-db (parse-st (get-in (:openAPIV3Schema (:schema (first (get-in st [:spec :versions])))) [:properties :spec :properties :realm :properties])))
-
-;; (def st-db (parse-st st))
-
-;;(def st-db (parse-st-at st 0 20))
-
-
-
-                                        ;(get-in db [:element/id 1])
-
-

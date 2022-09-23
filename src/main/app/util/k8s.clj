@@ -16,6 +16,11 @@
   (vec (sort-by first (remove nil? (map #(if (= group (-> % (:spec) (:group)))
                            (-> % (:spec) (:names) (:kind))) crds)))))
 
+(defn create-crd-groups [crds]
+  (let [groups (get-crd-groups crds)]
+    (mapv (fn [group] {:crd-group/id group
+                       :crd-group/crds (get-crds-in-group crds group)}) groups)))
+
 ;; (defn get-crd [oc name]
 ;;   (k8s/invoke oc {:kind :CustomResourceDefinition :action :get :request {:name name}}))
 
@@ -23,7 +28,7 @@
   (first (filter #(= name (-> % (:spec) (:names) (:kind))) crds)))
 
 
-(defstate oc :start (k8s/client "https://api.gxmpox00.westeurope.aroapp.io:6443" {:token "sha256~gc-c0a2dZYkBbiN3mrULbU-1c_jkRZnwbGaVS-F99ok"}))
+(defstate oc :start (k8s/client "https://api.gxmpox00.westeurope.aroapp.io:6443" {:token "sha256~2GzstNh3BxDhJuMF6ru0_PMEs_SAW0HTxvadzfzHYnA"}))
 
 (defstate crds :start (get-crds oc))
 
