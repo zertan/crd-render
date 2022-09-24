@@ -175,39 +175,43 @@
      (action [{:keys [app state]}] true)
      (remote [env] true)
      (ok-action [{:keys [app state result]}]
-                (comp/transact! app `[(app.model.main/create-cr! ~{:crd/id id})]))))
+                (comp/transact! app `[(app.model.main/add-cr! ~{:crd/id id})]))))
 
 #?(:clj
    (pc/defmutation add-cr! [{:keys [db] :as env} {:keys [:crd/id]}]
      {::pc/input #{:crd/id}
       ;::pc/output []
       }
-     (let [required (d/q '[:find ?r
-                           :where [?c :crd/id id]
-                           [?c :crd/property ?p]
-                           [?p :property/required ?r]]
-                         @db/conn)
+     (let [res (d/q `[:find ?r, ?id
+                      :where [?c :crd/id ~id]
+                             [?c :crd/property ?p]
+                             [?c :crd/property ?id]
+                             [?p :property/required ?r]]
+                    @db/conn)
+           req (map first res)
+           id (first (map second res))
            req-prop-ids (d/q [:find '?id
                               :where ['?c :crd/id id]
-                              ['?c :crd/property '?p]
-                              ['?p :property/properties '?p2]
-                              (into (map (fn [x] ['?p2 :property/name (keyword (first x))]) (first (vec req))) '(or))
-                              ['?p2 :property/id '?id]]
+                                     ['?c :crd/property '?p]
+                                     ['?p :property/properties '?p2]
+                                     (into (map (fn [x] ['?p2 :property/name (keyword (first x))]) (first (vec req))) '(or))
+                                     ['?p2 :property/id '?id]]
                              @db/conn)]
      (d/transact db/conn [{:cr/id (tempid/tempid)
                            :cr/metadata [{:property/id (tempid/tempid)
                                           :property/name :my-cr}]
                            :cr/crd [:crd/id id]
                            :cr/property (map copy-property req-prop-ids)}]))
-     {}))
+     {})
+   :cljs
+   (m/defmutation add-cr! [{:keys [:crd/id]}]
+     (action [{:keys [app state]}]
+             (merge/merge-component! app Cr (comp/get-initial-state Cr cr) :replace [:component/id :main :main/cr])
+         ;(df/load! app [:crd/group group] CrdGroups {:target (targeting/replace-at [:component/id :main :main/crds])})
+             true)
+     (remote [env] true)))
 
-
-;; we should propably do this in a client side mutation merge/comp
-(defn copy-property [{:keys [:property/id]}]
-  
-  )
-
-#?(:clj 
+#?(:clj
    (pc/defmutation get-cr [{:keys [db] :as env} {:keys [:cr/id]}]
      {::pc/input #{:cr/id}
       ::pc/output [:cr/id
@@ -224,24 +228,22 @@
              true)))
  
 
-#?(:clj
-   (pc/defresolver get-cr! [{:keys [db] :as env} {:keys [:crd/id :crd-group/id]}]
-     {::pc/input  #{:crd/id}
-      ::pc/output [:property/id]}
-     (let [req (d/q '[:find ?r
-                      :where [?c :crd/id id]
-                             [?c :crd/property ?p]
-                             [?p :property/required ?r]]
-                    @db/conn)
-           ])
-     {})
-   :cljs
-   (m/defmutation get-cr! [{:keys [:crd/id]}]
-     (action [{:keys [app state]}]
-             ;(df/load! app [:crd/group group] CrdGroups {:target (targeting/replace-at [:component/id :main :main/crds])})
-             true)))
-
-
+;; #?(:clj
+;;    (pc/defresolver get-cr! [{:keys [db] :as env} {:keys [:crd/id :crd-group/id]}]
+;;      {::pc/input  #{:crd/id}
+;;       ::pc/output [:property/id]}
+;;      (let [req (d/q '[:find ?r
+;;                       :where [?c :crd/id id]
+;;                              [?c :crd/property ?p]
+;;                              [?p :property/required ?r]]
+;;                     @db/conn)
+;;            ])
+;;      {})
+;;    :cljs
+;;    (m/defmutation get-cr! [{:keys [:crd/id]}]
+;;      (action [{:keys [app state]}]
+;;              ;(df/load! app [:crd/group group] CrdGroups {:target (targeting/replace-at [:component/id :main :main/crds])})
+;;              true)))
 
 #?(:clj
-   (def resolvers [add-crd-groups! add-crd! get-cr get-cr! get-crd-groups get-crd-group]))
+   (def resolvers [add-crd-groups! add-crd! add-cr! get-cr get-crd-groups get-crd-group]))

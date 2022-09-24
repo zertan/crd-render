@@ -206,7 +206,7 @@
                         ['?p :property/properties '?p2]
                 (into (map (fn [x] ['?p2 :property/name (keyword (first x))]) (first (vec req))) '(or))
                         ['?p2 :property/id '?id]]
-                    @db/conn)])
+                    @db/conn)] req-crd-id)
 
 
 
