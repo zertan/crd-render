@@ -141,7 +141,8 @@
    ;:route-segment ["settings"]
    :initial-state (fn [_] {:root/main (comp/get-initial-state main/Main)})}
   (div {:className  "ui container segment"
-        :style {:background-color "#e4e7ed"}}
+        ;:style {:background-color "#e4e7ed"}
+        }
     (main/ui-main main)))
 
 ;; (def ui-main (comp/factory Main))

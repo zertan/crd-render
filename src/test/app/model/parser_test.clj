@@ -29,9 +29,12 @@
                   p/request-cache-plugin
                   p/trace-plugin]}))
 
+(comment 
 (parser {} [{:main/crd-groups [:crd-group/id :crd-group/crds]}])
 
-(parser {} [[:crd-group/id "keycloak.io"]])
+(parser {} [{:main/crd-groups [:crd-group/id :crd-group/crds]}])
+
+(parser {} [[:crd-group/id "keycloak.io"]]))
 
 ;; (parser {} [{:main/element [{:element/text [:txt/text]}]}])
 

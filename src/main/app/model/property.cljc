@@ -23,10 +23,11 @@
 
 (declare ui-property)
 
-(defsc Property [this {:keys [:property/id :property/properties :property/name :property/type :property/description :property/items :property/required] :as props}]
+(defsc Property [this {:keys [:property/id :property/properties :property/name :property/type :property/description :property/items :property/required :property/reference] :as props}]
   {:query         (fn [] [:property/id
                           :property/name
-                          :property/type               
+                          :property/type
+                          {:property/reference [:property/id]}
                           {:property/items '...}
                           :property/description
                           :property/required

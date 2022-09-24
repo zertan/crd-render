@@ -166,6 +166,49 @@
 
 
 
+(d/pull @db/conn '[:crd-group/id :crd-group/crds] [:crd-group/id "acid.zalan.do"])
+
+
+;;;;;;;;;;;
+
+
+(let [req (d/q '[:find ?c
+                      :where [?c :crd/id "keycloak.org/Keycloak"]]
+                    @db/conn)] req)
+
+(let [req (d/q '[:find ?c
+                      :where [?c :crd/id "keycloak.org/Keycloak"]]
+                    @db/conn)] req)
+
+(d/pull @db/conn '[{:crd/property [:property/id]}] [:crd/id "apps.3scale.net/APIManager"])
+
+
+(let [req (d/q '[:find ?r
+                 :where [?c :crd/id "apps.3scale.net/APIManager"]
+                        [?c :crd/property ?p]
+                        [?p :property/name ?r]]
+                    @db/conn)] req)
+
+(def req (d/q '[:find ?r
+                :where [?c :crd/id "apps.3scale.net/APIManager"]
+                       [?c :crd/property ?p]
+                       [?p :property/required ?r]]
+              @db/conn))
+
+(let [req (d/q '[:find ?r
+                :where [?c :crd/id "apps.3scale.net/APIManager"]
+                       [?c :crd/property ?p]
+                       [?p :property/required ?r]]
+              @db/conn)
+      req-crd-id (d/q [:find '?id
+                 :where ['?c :crd/id "apps.3scale.net/APIManager"]
+                        ['?c :crd/property '?p]
+                        ['?p :property/properties '?p2]
+                (into (map (fn [x] ['?p2 :property/name (keyword (first x))]) (first (vec req))) '(or))
+                        ['?p2 :property/id '?id]]
+                    @db/conn)])
+
+
 
 )
 

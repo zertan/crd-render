@@ -24,8 +24,9 @@
 ;; (defn get-crd [oc name]
 ;;   (k8s/invoke oc {:kind :CustomResourceDefinition :action :get :request {:name name}}))
 
-(defn get-crd [crds name]
-  (first (filter #(= name (-> % (:spec) (:names) (:kind))) crds)))
+(defn get-crd [crds group name]
+  (first (filter #(and (= group (-> % (:spec) (:group)))
+                       (= name (-> % (:spec) (:names) (:kind)))) crds)))
 
 
 (defstate oc :start (k8s/client "https://api.gxmpox00.westeurope.aroapp.io:6443" {:token "sha256~2GzstNh3BxDhJuMF6ru0_PMEs_SAW0HTxvadzfzHYnA"}))
