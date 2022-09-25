@@ -1,5 +1,6 @@
 (ns app.model.property
   (:require
+   [app.util :as util]
    ;[app.application :refer [SPA]]
    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
    #?(:clj
@@ -24,10 +25,7 @@
 
 (declare copy-property)
 
-#?(:cljs
-   (do
-
-   (declare ui-property)
+(declare ui-property)
 
 (defsc Property [this {:keys [:property/id :property/properties :property/name :property/type :property/description :property/items :property/required :property/reference] :as props}]
   {:query         (fn [] [:property/id
@@ -67,7 +65,7 @@
     ;(dom/span (ui-divider {:vertical true}))
               (condp = type
     (dom/text {:style {:outline "none" :border "none" :margin-left (* 10 (:c c))}} 
-       (str name " " type " " items)))})
+       (str name ": " " " items)))})
    (if (:property/properties reference)
      (ui-button {:icon true
                :inverted true
@@ -83,7 +81,7 @@
                      :selection true
                      :options (mapv (fn [x] {:text (str (:property/name x) " " (:property/type x)) :value (:property/id x) :key (:property/name x)}) (:property/properties reference))
                      :onChange (fn [e]
-                             (comp/transact! this `[(model.app.property/add-property! ~{:property (copy-property (first (filterv #(= (:property/id %)  e.target.value) reference)))
+                             (comp/transact! this `[(model.app.property/add-property! ~{:property (copy-property (first (filterv #(= (:property/id %)  (util/get-value e)) reference)))
                                                                                         :append [:property/id id :property/properties]})])
                              (comp/set-state! this {:show-dropdown? false})
                              )})))
@@ -91,7 +89,7 @@
               (comp/get-state this :open?))
        (map #(ui-property % {:c (inc (:c c))}) (reverse properties)))))))
 
-(def ui-property (comp/computed-factory Property {:keyfn :property/id}))))
+(def ui-property (comp/computed-factory Property {:keyfn :property/id}))
 
 #?(:cljs
    (do
@@ -100,14 +98,19 @@
    ;;    (if-let [p (get property :property/properties)]
    ;;      (map copy-property p)
    ;;      (comp/get-initial-state Property (assoc-in property [:property/id] (tempid/tempid))))))
-
-(defn copy-property [property]
-  (comp/get-initial-state Property (-> property
-                                       (assoc :property/id (tempid/tempid))
-                                       (assoc :property/reference [:property/id (:property/id property)])
-                                       (assoc :property/properties (mapv copy-property (:property/properties property))))))
-
 ))
+
+(defn filter-r [property filter-req]
+  (vec (remove nil? (mapv (fn [x] (first (filterv (fn [y] (= (:property/name y) x)) (:property/properties property)))) filter-req))))
+
+(defn copy-property [property & filter-req]
+  (-> property
+      (assoc :property/id (tempid/uuid))
+      (assoc :property/reference [:property/id (:property/id property)])
+      (assoc :property/properties (mapv #(copy-property %)
+                                        (if (first filter-req)
+                                            (filter-r property (first filter-req))
+                                            (:property/properties property))))))
 
 #?(:clj
    (pc/defresolver get-property [{:keys [db] :as env} {:keys [property/id]}]

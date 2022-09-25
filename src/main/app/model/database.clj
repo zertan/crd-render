@@ -11,24 +11,29 @@
 ;; everything else.
 (def schema {:property/id          {:db/cardinality          :db.cardinality/one
                                     :db/unique               :db.unique/identity}
-
              :property/properties  {:db/cardinality          :db.cardinality/many
                                     :db/valueType            :db.type/ref
                                     :db/isComponent          true}
-
              :property/items       {:db/cardinality          :db.cardinality/many
                                     :db/valueType            :db.type/ref
                                     :db/isComponent          true}
 
              :crd/id               {:db/cardinality          :db.cardinality/one
                                     :db/unique               :db.unique/identity}
-
              :crd/property         {:db/cardinality          :db.cardinality/one
                                     :db/valueType            :db.type/ref
                                     :db/isComponent          true}
-
              :crd-group/id         {:db/cardinality          :db.cardinality/one
-                                    :db/unique               :db.unique/identity}})
+                                    :db/unique               :db.unique/identity}
+
+             :cr/id                {:db/cardinality          :db.cardinality/one
+                                    :db/unique               :db.unique/identity}
+             :cr/crd               {:db/cardinality          :db.cardinality/one
+                                    :db/valueType            :db.type/ref}
+             :cr/property          {:db/cardinality          :db.cardinality/one
+                                    :db/valueType            :db.type/ref
+                                    :db/isComponent          true}
+})
 
 (defn new-database [schema] (d/create-conn schema))
 

@@ -17,3 +17,8 @@
   #?(:cljs ([& args]
             [(s/* any?) => uuid?]
             (cljs.core/uuid (apply str args)))))
+
+(defn get-value [e]
+   (.. e -target -value))
+(defn get-text [e]
+   (.. e -target -textContent))
