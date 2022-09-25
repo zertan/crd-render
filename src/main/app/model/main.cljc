@@ -22,7 +22,7 @@
     #?(:clj [app.util.parse-crds :as parse-crds])
     #?(:clj [com.fulcrologic.fulcro.dom-server :as dom :refer [div]]
        :cljs [com.fulcrologic.fulcro.dom :as dom :refer [div]])
-    [com.fulcrologic.semantic-ui.factories :refer [ui-button ui-menu ui-dropdown ui-dropdown-menu ui-dropdown-item]]))
+    [com.fulcrologic.semantic-ui.factories :refer [ui-button ui-menu ui-menu-item ui-dropdown ui-dropdown-menu ui-dropdown-item ui-segment]]))
 
 (defsc Crd [this {:keys [:crd/id :crd/group :crd/version :crd/property]}]
    {:ident :crd/id
@@ -54,10 +54,12 @@
                             :cr/crd (or (:cr/crd cr) (comp/get-initial-state Crd))
                             :cr/property (or (comp/get-initial-state property/Property (:cr/property cr))
                                              (comp/get-initial-state property/Property))})}
+  (let [cv (clojure.string/split (:crd/id crd) #"/")]
   (dom/div
-   (dom/text (str "apiVersion: " (get crd :version) "/" (get crd :id)))
-   (map #(property/ui-property % {:c 0}) metadata)
-   (property/ui-property property {:c 0})))
+   (dom/div (str "apiVersion: " (str (first cv) "/" (:crd/version crd))))
+   (dom/div (str "kind: " (second cv)))
+   ;(map #(property/ui-property % {:c 0}) metadata)
+   (property/ui-property property {:c 0}))))
 
 (def ui-cr (comp/computed-factory Cr))
 
@@ -83,7 +85,7 @@
                      :onChange (fn [e]
                                  (comp/set-state! this {:selected-group (str (util/get-text e))}))})
        (ui-dropdown {:placeholder "Select CustomResourceDefinition ..."
-                     :fluid true
+                     :fluid false
                      :selection true
                      :options (mapv (fn [x] {:text x :value x :key x}) (:crd-group/crds (first (filter (fn [x] (= (:crd-group/id x) (comp/get-state this :selected-group))) crd-groups))))
                      :onChange (fn [e]
@@ -91,15 +93,15 @@
                                  (comp/transact! this `[(app.model.main/add-crd! ~{:crd/id (str (comp/get-state this :selected-group) "/" (util/get-text e))})]))})
        (div
         (ui-menu {:attached "top"}
-                 (ui-button {:icon "plus"
+                 (ui-menu-item {:icon "plus"
                              :item true
                              :simple true
                              :size :small
                              :onClick (fn [e]
                                         (let [top-prop (:crd/property crd)
                                               required (mapv keyword (:property/required top-prop))
+                                              b (println top-prop)
                                               a (println required)
-                                              a (println (property/copy-property (:crd/property crd) required))
                                               cr {:cr/id (tempid/uuid)
                                                   :cr/metadata [{:property/id (tempid/uuid)
                                                                  :property/name :my-cr
@@ -108,8 +110,13 @@
                                                   :cr/property (property/copy-property (:crd/property crd) required)
                                                   }]
                                            (comp/transact! this `[(app.model.main/add-cr! ~{:cr cr})])))}))
-           (if cr
-            (ui-cr cr)))))
+        (ui-segment {:attached "bottom"
+                     :style {:background-color "#363636"
+                             :font-size 16
+                             :font-family "'Roboto Mono', monospace"
+                             :color "#CCCCCC"}}
+         (if cr
+            (ui-cr cr))))))
 
 (def ui-main (comp/computed-factory Main))
 
@@ -176,10 +183,11 @@
    (pc/defmutation add-crd! [{:keys [db] :as env} {:keys [:crd/id]}]
      {::pc/input #{:crd/id}}
      (let [ng (clojure.string/split id #"/")
-          crd-temp (k8s/get-crd k8s/crds (first ng) (second ng))]
-     (d/transact db/conn [{:crd/id id
-                           :crd/version (parse-crds/get-version-name crd-temp)
-                           :crd/property (parse-crds/parse-cr (parse-crds/get-schema crd-temp) {:name :spec})}]))
+           crd-temp (k8s/get-crd k8s/crds (first ng) (second ng))
+           res (d/transact db/conn [{:crd/id id
+                                     :crd/version (parse-crds/get-version-name crd-temp)
+                                     :crd/property (parse-crds/parse-cr (parse-crds/get-schema crd-temp) {:name :spec})}])]
+     (log/info res))
      {})
 
    :cljs
@@ -229,9 +237,7 @@
    :cljs
    (m/defmutation add-cr! [{:keys [cr]}]
      (action [{:keys [app state]}]
-             (merge/merge-component! app Cr cr :replace [:component/id :main :main/cr])
-         ;(df/load! app [:crd/group group] CrdGroups {:target (targeting/replace-at [:component/id :main :main/crds])})
-             true)
+             (merge/merge-component! app Cr (comp/get-initial-state Cr cr) :replace [:component/id :main :main/cr]))
      ;(remote [env] true)
      ))
 

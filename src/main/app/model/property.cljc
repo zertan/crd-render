@@ -37,15 +37,13 @@
                           :property/required
                           {:property/properties '...}])
    :ident         :property/id
-   :initial-state (fn [{:keys [id name type reference
-                               items description
-                               required properties]}] {:property/id (or id (tempid/tempid))
-                                                       :property/name (or name "new-name")
-                                                       :property/type (or type "object")
-                                                       :property/items (or items [])
-                                                       :property/description ""
-                                                       :property/required (or required nil)
-                                                       :property/properties (or properties [])})
+   :initial-state (fn [property] {:property/id (or (:property/id property) (tempid/tempid))
+                                  :property/name (or (:property/name property) "new-name")
+                                  :property/type (or (:property/type property) "object")
+                                  :property/items (or (:property/items property) [])
+                                  :property/description (or (:property/description property) "")
+                                  :property/required (or (:property/required property) [])
+                                  :property/properties (or (:property/properties property) [])})
    :initLocalState (fn [this props]
                      {:open? false
                       :show-dropdown? false})}
@@ -53,9 +51,10 @@
   (let [c  (comp/get-computed this)]
   (dom/div
   (dom/span
-   (if properties
+   (if (or (= type "object") (= type "array"))
    (ui-button {:icon true
-               :inverted true
+               ;:color ""
+               ;:inverted true
                :size :tiny
                :onClick (fn [e]
                           (comp/set-state! this {:open? (not (comp/get-state this :open?))}))}
@@ -65,15 +64,15 @@
     ;(dom/span (ui-divider {:vertical true}))
               (condp = type
     (dom/text {:style {:outline "none" :border "none" :margin-left (* 10 (:c c))}} 
-       (str name ": " " " items)))})
+              (str name ": " type " " (if-not empty? items))))})
    (if (:property/properties reference)
      (ui-button {:icon true
-               :inverted true
-               :size :tiny
-               :onClick (fn [e]
-                          (comp/set-state! this {:show-dropdown true})
-                          )}
-              (ui-icon {:name "plus"}))
+                 :inverted true
+                 :size :tiny
+                 :onClick (fn [e]
+                            (comp/set-state! this {:show-dropdown true})
+                            )}
+                (ui-icon {:name "plus"}))
      (if (comp/get-state this :show-dropdown?)
        (ui-dropdown {:placeholder "Property ..."
                      :fluid true
@@ -87,7 +86,7 @@
                              )})))
    (when (and (not (empty? properties))
               (comp/get-state this :open?))
-       (map #(ui-property % {:c (inc (:c c))}) (reverse properties)))))))
+       (map #(ui-property % {:c (inc (:c c))}) (reverse (if (= type "array") items properties))))))))
 
 (def ui-property (comp/computed-factory Property {:keyfn :property/id}))
 

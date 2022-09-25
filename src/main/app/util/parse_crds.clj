@@ -56,14 +56,14 @@
 
 ;; spec
 
-(defn parse-cr [e]
-  (condp = (type e)
-    clojure.lang.PersistentVector (mapv parse-cr e)
-    clojure.lang.PersistentArrayMap (do (println (keys e)) (parse-cr (convert-to-vec e)))
-    clojure.lang.PersistentHashMap (do (println (keys e)) (parse-cr (convert-to-vec e)))
-    ;java.lang.String 
-    ;java.lang.Long st
-    nil))
+;; (defn parse-cr [e]
+;;   (condp = (type e)
+;;     clojure.lang.PersistentVector (mapv parse-cr e)
+;;     clojure.lang.PersistentArrayMap (do (println (keys e)) (parse-cr (convert-to-vec e)))
+;;     clojure.lang.PersistentHashMap (do (println (keys e)) (parse-cr (convert-to-vec e)))
+;;     ;java.lang.String 
+;;     ;java.lang.Long st
+;;     nil))
 
 (defn map->nsmap
   [m n]
@@ -84,7 +84,10 @@
         (if (contains? e :properties)
         (let [k (keys (:properties e))
               v (vals (:properties e))]
-          {:properties (mapv #(parse-cr (nth v %) {:name (nth k %)}) (range (count k)))})))) 'property))
+          {:properties (mapv #(parse-cr (nth v %) {:name (nth k %)}) (range (count k)))})))
+       (conj
+        (if (contains? e :items)
+          {:items (parse-cr (:items e))}))) 'property))
 
 (defn build-crd-data [crd-string comp]
   (let [parsed (parse-cr (get-schema (k8s/get-crd k8s/crds crd-string)) {:name :spec})

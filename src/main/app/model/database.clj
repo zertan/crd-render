@@ -14,7 +14,7 @@
              :property/properties  {:db/cardinality          :db.cardinality/many
                                     :db/valueType            :db.type/ref
                                     :db/isComponent          true}
-             :property/items       {:db/cardinality          :db.cardinality/many
+             :property/items       {:db/cardinality          :db.cardinality/one
                                     :db/valueType            :db.type/ref
                                     :db/isComponent          true}
 
