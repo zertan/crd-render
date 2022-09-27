@@ -22,7 +22,7 @@
     #?(:clj [app.util.parse-crds :as parse-crds])
     #?(:clj [com.fulcrologic.fulcro.dom-server :as dom :refer [div]]
        :cljs [com.fulcrologic.fulcro.dom :as dom :refer [div]])
-    [com.fulcrologic.semantic-ui.factories :refer [ui-button ui-menu ui-menu-item ui-dropdown ui-dropdown-menu ui-dropdown-item ui-segment]]))
+    [com.fulcrologic.semantic-ui.factories :refer [ui-button ui-menu ui-menu-item ui-dropdown ui-dropdown-menu ui-dropdown-item ui-segment ui-transition ui-container ui-grid ui-grid-row ui-grid-column]]))
 
 (defsc Crd [this {:keys [:crd/id :crd/group :crd/version :crd/property]}]
    {:ident :crd/id
@@ -55,13 +55,13 @@
                             :cr/property (or (comp/get-initial-state property/Property (:cr/property cr))
                                              (comp/get-initial-state property/Property))})}
   (let [cv (clojure.string/split (:crd/id crd) #"/")]
-  (dom/div
-   (dom/div (str "apiVersion: " (str (first cv) "/" (:crd/version crd))))
-   (dom/div (str "kind: " (second cv)))
-   ;(map #(property/ui-property % {:c 0}) metadata)
-   (property/ui-property property {:c 0}))))
+(dom/div
+ (dom/div {:style {:margin-left "1.2rem"}} (str "apiVersion: " (str (first cv) "/" (:crd/version crd))))
+ (dom/div {:style {:margin-left "1.2rem"}} (str "kind: " (second cv)))
+                                        ;(map #(property/ui-property % {:c 0}) metadata)
+ (property/ui-property property {:c 0}))))
 
-(def ui-cr (comp/computed-factory Cr))
+(def ui-cr (comp/computed-factory Cr {:keyfn :cr/id}))
 
 (defsc Main [this {:keys [:main/cr :main/crd :main/crd-groups] :as props}]
   {:query         [{:main/crd-groups (comp/get-query CrdGroup)}
@@ -76,47 +76,59 @@
    :route-segment ["main"]
    :componentDidMount (fn [this]
                         (comp/transact! this `[(app.model.main/add-crd-groups! {})]))}
-  (div :.ui.container
-       (ui-dropdown {:placeholder "Select CustomResourceGroup ..."
-                     :fluid true
-                     :search true
-                     :selection true
-                     :options (mapv (fn [x] (let [crdg (:crd-group/id x)] {:text crdg :value crdg :key crdg})) crd-groups)
-                     :onChange (fn [e]
-                                 (comp/set-state! this {:selected-group (str (util/get-text e))}))})
-       (ui-dropdown {:placeholder "Select CustomResourceDefinition ..."
-                     :fluid false
-                     :selection true
-                     :options (mapv (fn [x] {:text x :value x :key x}) (:crd-group/crds (first (filter (fn [x] (= (:crd-group/id x) (comp/get-state this :selected-group))) crd-groups))))
-                     :onChange (fn [e]
-                                 (comp/set-state! this {:selected-crd (str (util/get-text e))})
-                                 (comp/transact! this `[(app.model.main/add-crd! ~{:crd/id (str (comp/get-state this :selected-group) "/" (util/get-text e))})]))})
-       (div
-        (ui-menu {:attached "top"}
-                 (ui-menu-item {:icon "plus"
-                             :item true
-                             :simple true
-                             :size :small
-                             :onClick (fn [e]
-                                        (let [top-prop (:crd/property crd)
-                                              required (mapv keyword (:property/required top-prop))
-                                              b (println top-prop)
-                                              a (println required)
-                                              cr {:cr/id (tempid/uuid)
-                                                  :cr/metadata [{:property/id (tempid/uuid)
-                                                                 :property/name :my-cr
-                                                                 :property/type "string"}]
-                                                  :cr/crd [:crd/id (:crd/id crd)]
-                                                  :cr/property (property/copy-property (:crd/property crd) required)
-                                                  }]
-                                           (comp/transact! this `[(app.model.main/add-cr! ~{:cr cr})])))}))
-        (ui-segment {:attached "bottom"
-                     :style {:background-color "#363636"
-                             :font-size 16
-                             :font-family "'Roboto Mono', monospace"
-                             :color "#CCCCCC"}}
-         (if cr
-            (ui-cr cr))))))
+  (ui-container {:children
+                 (dom/div
+                  (ui-menu {:attached "top"
+                            :inverted true}
+                           (ui-menu-item {:icon "plus"
+                                          :item "true"
+                                          :simple "true"
+                                          :size :small
+                                          :onClick (fn [e]
+                                                     (let [c (println  (:crd/property crd))
+                                                           top-prop (:crd/property crd)
+                                                           required (mapv keyword (:property/required top-prop))
+                                                           b (println top-prop)
+                                                           a (println required)
+                                                           cr {:cr/id (tempid/uuid)
+                                                               :cr/metadata [{:property/id (tempid/uuid)
+                                                                              :property/name :my-cr
+                                                                              :property/type "string"}]
+                                                               :cr/crd [:crd/id (:crd/id crd)]
+                                                               :cr/property
+                                                               ;[(property/crap (:crd/property crd) true)]
+                                        (property/copy-property (:crd/property crd) "filter")
+                                                               }]
+                                           (comp/transact! this `[(app.model.main/add-cr! ~{:cr cr})])))})
+                           (ui-dropdown {:placeholder "Select CustomResourceGroup ..."
+                                        ;:fluid true
+                                         :search true
+                                         :compact true
+                                         :selection true
+                                         :style {:margin "0.4rem"}
+                                         :options (mapv (fn [x] (let [crdg (:crd-group/id x)] {:text crdg :value crdg :key crdg})) crd-groups)
+                                         :onChange (fn [e]
+                                                     (comp/set-state! this {:selected-group (str (util/get-text e))}))})
+                           
+                 (ui-dropdown {:placeholder "Select CustomResourceDefinition ..."
+                               :fluid false
+                               :compact true
+                               :selection true
+                               :style {:margin "0.4rem"
+                                       ;:width "150px"
+                                       }
+                               :options (mapv (fn [x] {:text x :value x :key x}) (:crd-group/crds (first (filter (fn [x] (= (:crd-group/id x) (comp/get-state this :selected-group))) crd-groups))))
+                               :onChange (fn [e]
+                                           (comp/set-state! this {:selected-crd (str (util/get-text e))})
+                                           (comp/transact! this `[(app.model.main/add-crd! ~{:crd/id (str (comp/get-state this :selected-group) "/" (util/get-text e))})]))}))
+                  (ui-segment {:attached "bottom"
+                               :inverted true
+                               :style {:background-color "#363636"
+                                       :font-size 16
+                                       :font-family "'Roboto Mono', monospace"
+                                       :color "#CCCCCC"}}
+                              (if cr
+            (ui-cr cr))))}))
 
 (def ui-main (comp/computed-factory Main))
 
@@ -187,8 +199,7 @@
            res (d/transact db/conn [{:crd/id id
                                      :crd/version (parse-crds/get-version-name crd-temp)
                                      :crd/property (parse-crds/parse-cr (parse-crds/get-schema crd-temp) {:name :spec})}])]
-     (log/info res))
-     {})
+     {}))
 
    :cljs
    (m/defmutation add-crd! [{:keys [:crd/id]}]

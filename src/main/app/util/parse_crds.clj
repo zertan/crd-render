@@ -79,7 +79,7 @@
   (map->nsmap
    (-> e
        (conj {:id (tempid/uuid)
-              :name name})
+              :name (or name "")})
        (conj
         (if (contains? e :properties)
         (let [k (keys (:properties e))

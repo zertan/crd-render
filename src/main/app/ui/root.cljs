@@ -137,13 +137,15 @@
 
 (defsc Root [this {:keys [:root/main] :as props}]
   {:query         [{:root/main (comp/get-query main/Main)}]
+   :css           [[:.bg {:background-color "blue"}]]
    ;:ident         (fn [] [:component/id :settings])
    ;:route-segment ["settings"]
    :initial-state (fn [_] {:root/main (comp/get-initial-state main/Main)})}
-  (div {:className  "ui container segment"
-        ;:style {:background-color "#e4e7ed"}
-        }
-    (main/ui-main main)))
+  (div {:style {;:background-color "#BBBBBB"
+                :background "linear-gradient(0deg, rgba(0,53,78,1) 0%, rgba(1,0,17,1) 100%)"
+                :min-height "100vh"
+                :height "100%"}}
+   (main/ui-main main)))
 
 ;; (def ui-main (comp/factory Main))
 

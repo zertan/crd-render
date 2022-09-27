@@ -208,7 +208,15 @@
                         ['?p2 :property/id '?id]]
                     @db/conn)] req-crd-id)
 
+;;;;;;;;;;
 
+     (let [id "apps.3scale.net/APIManager"
+           ng (clojure.string/split id #"/")
+           crd-temp (k8s/get-crd k8s/crds (first ng) (second ng))
+           res (d/transact db/conn [{:crd/id id
+                                     :crd/version (parse-crds/get-version-name crd-temp)
+                                     :crd/property (parse-crds/parse-cr (parse-crds/get-schema crd-temp) {:name :spec})}])]
+     (log/info res))
 
 )
 
