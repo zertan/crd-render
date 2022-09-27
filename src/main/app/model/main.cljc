@@ -85,11 +85,12 @@
                                           :simple "true"
                                           :size :small
                                           :onClick (fn [e]
-                                                     (let [c (println  (:crd/property crd))
+                                                     (let [;c (println  (:crd/property crd))
                                                            top-prop (:crd/property crd)
                                                            required (mapv keyword (:property/required top-prop))
-                                                           b (println top-prop)
-                                                           a (println required)
+                                                           ;b (println top-prop)
+                                                           ;a (println required)
+                                                           asd (println "asd " (property/copy-property (:crd/property crd) "filter"))
                                                            cr {:cr/id (tempid/uuid)
                                                                :cr/metadata [{:property/id (tempid/uuid)
                                                                               :property/name :my-cr
@@ -97,13 +98,11 @@
                                                                :cr/crd [:crd/id (:crd/id crd)]
                                                                :cr/property
                                                                ;[(property/crap (:crd/property crd) true)]
-                                        (property/copy-property (:crd/property crd) "filter")
-                                                               }]
+                                        (property/copy-property (:crd/property crd) "filter")}]
                                            (comp/transact! this `[(app.model.main/add-cr! ~{:cr cr})])))})
                            (ui-dropdown {:placeholder "Select CustomResourceGroup ..."
                                         ;:fluid true
                                          :search true
-                                         :compact true
                                          :selection true
                                          :style {:margin "0.4rem"}
                                          :options (mapv (fn [x] (let [crdg (:crd-group/id x)] {:text crdg :value crdg :key crdg})) crd-groups)
@@ -112,8 +111,8 @@
                            
                  (ui-dropdown {:placeholder "Select CustomResourceDefinition ..."
                                :fluid false
-                               :compact true
                                :selection true
+                               :compact true
                                :style {:margin "0.4rem"
                                        ;:width "150px"
                                        }
@@ -123,7 +122,7 @@
                                            (comp/transact! this `[(app.model.main/add-crd! ~{:crd/id (str (comp/get-state this :selected-group) "/" (util/get-text e))})]))}))
                   (ui-segment {:attached "bottom"
                                :inverted true
-                               :style {:background-color "#363636"
+                               :style {:background-color "#2D2D2D"
                                        :font-size 16
                                        :font-family "'Roboto Mono', monospace"
                                        :color "#CCCCCC"}}

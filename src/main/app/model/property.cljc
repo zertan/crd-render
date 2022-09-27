@@ -51,7 +51,8 @@
    :initLocalState (fn [this props]
                      {:open? false
                       :show-dropdown? false
-                      :show-plus? false})}
+                      :show-plus? false
+                      :show-type? false})}
 
   (let [c  (comp/get-computed this :c)
         parent-type (comp/get-computed this :parent-type)]
@@ -65,7 +66,7 @@
                      :margin-top "2px"
                      :margin-left "0.5rem"}
              :onClick (fn [e]
-                        (println "it: " (:property/items reference))
+                        (println "it: " items)
                           (comp/set-state! this {:open? (not (comp/get-state this :open?))}))}))
   (ui-popup {:content description
              :trigger 
@@ -74,9 +75,10 @@
                          :style {:margin-left "1rem" :white-space "pre"
                                  :outline "none" :border "none"}
                          :onMouseEnter (fn [e]
-                                         (comp/set-state! this {:show-plus? true}))
-                         ;; :onMouseLeave (fn [e]
-                         ;;                 (comp/set-state! this {:show-plus? false}))
+                                         (comp/set-state! this {:show-plus? true
+                                                                :show-type? true}))
+                         :onMouseLeave (fn [e]
+                                         (comp/set-state! this {:show-type? false}))
                          :onClick (fn [e]
                                     (comp/set-state! this {:open? (not (comp/get-state this :open?))}))}
                         (let [margin (clojure.string/join (take (* 2 c) (repeat " ")))]
@@ -91,13 +93,21 @@
                                               :font-family "'Roboto Mono', monospace"
                                               :color "#CCCCCC"
                                               :border "none"
-                                              :outline "none"}})
+                                              :outline "none"}
+                                      :onFocus #(comp/set-state! this {:show-type? true})
+                                      :onBlur #(comp/set-state! this {:show-type? false})})
                   "boolean" (ui-checkbox {:checked value
                                           :style {:top "3px"}
                                           :onChange (fn [e]
                                                       (m/toggle! this :property/value)
                                                       (println value))})
-              nil))})
+              nil)
+              (if (comp/get-state this :show-type?) 
+                (dom/text {:style {:color "#0f1330"
+                                   :font-weight "bold"
+                                   :position "absolute"
+                                   :right "10rem"
+                                   }} (str "(" type ")"))))})
   (let [it (if (:property/properties reference)
              (:property/properties reference)
              (:property/items reference))]
@@ -120,18 +130,23 @@
                                          (comp/set-state! this {:show-dropdown? false}))
                     :style {:position "absolute"
                             :left "20rem"}
-                    :options (mapv (fn [x] {:text (str (:property/name x) " " (:property/type x)) :value (:property/id x) :key (:property/name x)}) it)
+                    :options (mapv (fn [x] {:text (str (:property/name x) " " (:property/type x)) :value (:property/name x) :key (:property/name x)}) it)
                     :onChange (fn [e]
-                                (comp/transact! this `[(app.model.property/add-property! ~{:property (copy-property (first (filterv #(= (:property/id %)  (util/get-value e)) it)))
-                                                                                           :append [:property/id id :property/properties]})])
+                                (let [k (keyword (clojure.string/replace-first (first (clojure.string/split (util/get-text e) #" ")) #":" ""))]
+                                ;(println "it: " it)
+                                ;(println "value: " )
+ (println "copy: " (copy-property (first (filterv #(= (:property/name %) k) it))))
+                                ;(println "b: " (first (filterv #(= (:property/name %) k) it)))
+                                (comp/transact! this `[(app.model.property/add-property! ~{:property (copy-property (first (filterv #(= (:property/name %) k) it)))
+                                                                                           :more id})]))
                                 (comp/set-state! this {:show-dropdown? false})
                                 )}))))))
   (when (and (not (empty? properties))
              (comp/get-state this :open?))
-     (map #(ui-property % {:c (inc c)}) (reverse (if (= type "array") items properties))))
+     (map #(ui-property % {:c (inc c)}) (reverse properties)))
   (when (and (not (empty? items))
              (comp/get-state this :open?))
-     #(ui-property items {:c (inc (:c c))})
+     (ui-property items (if (= type "array") (conj {:parent-type "array"} {:c (inc (inc (:c c)))}) {:c (inc (:c c))}))
 ))))
 
 (def ui-property (comp/computed-factory Property {:keyfn :property/id}))
@@ -145,18 +160,25 @@
    ;;      (comp/get-initial-state Property (assoc-in property [:property/id] (tempid/tempid))))))
 ))
 
-(defn filter-r [property filter-req]
-  (vec (remove nil? (mapv (fn [x] (first (filterv (fn [y] (= (:property/name y) x)) (:property/properties property)))) filter-req))))
+(defn filter-r [properties filter-req]
+  (vec (remove nil? (mapv (fn [x] (first (filterv (fn [y] (= (:property/name y) x)) properties))) filter-req))))
 
 (defn copy-property [property & filter-req]
-  (let [filter-req-2 (if filter-req (mapv keyword (:property/required property)))]
-  (-> property
-      (assoc :property/id (tempid/uuid))
-      (assoc :property/reference [:property/id (:property/id property)])
-      (assoc :property/properties (mapv #(copy-property % filter-req-2)
-                                        (if filter-req
-                                            (filter-r property filter-req)
-                                            (:property/properties property)))))))
+  (let [filter-req-2 (if filter-req (mapv keyword (:property/required property)))
+        ;as(println filter-req)
+        ;a (println filter-req-2)
+        ;properties (:property/properties property)
+        ;asd (println "a" (filter-r (:property/properties property) filter-req-2))
+        p (-> property
+              (assoc :property/id (tempid/uuid))
+              (assoc :property/value "")
+              (assoc :property/reference [:property/id (:property/id property)]))]
+(if (:property/items p)
+  (assoc p :property/items (copy-property (:property/items property))))
+  (assoc p :property/properties (mapv #(copy-property % filter-req-2)
+                                      (if filter-req-2
+                                            (filter-r (:property/properties property) filter-req-2)
+                                            (:property/properties property))))))
 
 (defn crap [property & filter-req]
   (println property)
@@ -189,7 +211,9 @@
    :cljs
    (m/defmutation add-property! [{:keys [property & more :as opts]}]
      (action [{:keys [app state]}]
-             (merge/merge-component! app Property (comp/get-initial-state Property property)))))
+             (println more)
+             (merge/merge-component! app Property (comp/get-initial-state Property property)
+                                     :append [:property/id more :property/properties]))))
 
 
              ;; (apply (partial (merge/merge-component! app Property (comp/get-initial-state Property property)))
