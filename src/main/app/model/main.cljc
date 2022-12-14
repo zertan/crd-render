@@ -79,7 +79,8 @@
   (ui-container {:children
                  (dom/div
                   (ui-menu {:attached "top"
-                            :inverted true}
+                            :inverted true
+                            }
                            (ui-menu-item {:icon "plus"
                                           :item "true"
                                           :simple "true"
@@ -90,7 +91,7 @@
                                                            required (mapv keyword (:property/required top-prop))
                                                            ;b (println top-prop)
                                                            ;a (println required)
-                                                           asd (println "asd " (property/copy-property (:crd/property crd) "filter"))
+                                                           asd (println "asd " (:property/reference (property/copy-property (:crd/property crd) "filter")))
                                                            cr {:cr/id (tempid/uuid)
                                                                :cr/metadata [{:property/id (tempid/uuid)
                                                                               :property/name :my-cr
@@ -98,7 +99,7 @@
                                                                :cr/crd [:crd/id (:crd/id crd)]
                                                                :cr/property
                                                                ;[(property/crap (:crd/property crd) true)]
-                                        (property/copy-property (:crd/property crd) "filter")}]
+                                                               (property/copy-property (:crd/property crd) "filter")}]
                                            (comp/transact! this `[(app.model.main/add-cr! ~{:cr cr})])))})
                            (ui-dropdown {:placeholder "Select CustomResourceGroup ..."
                                         ;:fluid true
@@ -122,7 +123,8 @@
                                            (comp/transact! this `[(app.model.main/add-crd! ~{:crd/id (str (comp/get-state this :selected-group) "/" (util/get-text e))})]))}))
                   (ui-segment {:attached "bottom"
                                :inverted true
-                               :style {:background-color "#2D2D2D"
+                               :style {:background-color "#282C34"
+                                       :min-height "50vh"
                                        :font-size 16
                                        :font-family "'Roboto Mono', monospace"
                                        :color "#CCCCCC"}}

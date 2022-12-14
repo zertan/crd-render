@@ -1,6 +1,7 @@
 (ns app.util.parse-crds
 (:require [app.util.k8s :as k8s :refer [crds]]
           [clojure.spec.alpha :as s]
+          [clojure.data.json :as json]
           [spec-provider.provider :as sp]
           [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
           [com.fulcrologic.fulcro.algorithms.server-render :as server-render]))
@@ -96,6 +97,13 @@
     {:crd {:crd/id crd-string
            :crd/property [:property/id crd-top-prop]}
      :properties (vec (vals (:property/id init-state)))}))
+
+
+(def k8s-api (slurp "./src/main/app/util/api.json"))
+
+
+
+
 
 ;; (s/def :spec/id tempid/tempid?)
 ;; (s/def :spec/name #(= % :spec))

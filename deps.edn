@@ -28,7 +28,8 @@
            io.fabric8/kubernetes-client        {:mvn/version "6.1.1"}
            nubank/k8s-api                      {:mvn/version "0.1.2"}
 
-           org.clojure/data.json               {:mvn/version "2.4.0"}}
+           org.clojure/data.json               {:mvn/version "2.4.0"}
+           metosin/spec-tools                  {:mvn/version "0.10.5"}}
 
  :aliases {:clj-tests {:extra-paths ["src/test"]
                        :main-opts   ["-m" "kaocha.runner"]

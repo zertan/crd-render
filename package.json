@@ -31,5 +31,11 @@
         "showdown": "^1.9.1"
     },
     "author": "",
-    "license": "MIT"
+    "license": "MIT",
+    "dependencies": {
+        "react-code-blocks": "^0.0.9-0",
+        "react-highlight": "^0.14.0",
+        "react-syntax-highlighter": "^15.5.0",
+        "rehype-highlight": "^5.0.2"
+    }
 }

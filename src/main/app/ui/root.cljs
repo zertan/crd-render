@@ -142,7 +142,7 @@
    ;:route-segment ["settings"]
    :initial-state (fn [_] {:root/main (comp/get-initial-state main/Main)})}
   (div {:style {;:background-color "#BBBBBB"
-                :background "linear-gradient(0deg, rgba(0,53,78,1) 0%, rgba(1,0,17,1) 100%)"
+                :background "#000000";"linear-gradient(0deg, rgba(210,212,226,1) 0%, rgba(245,245,245,1) 100%)"
                 :min-height "100vh"
                 :height "100%"}}
    (main/ui-main main)))

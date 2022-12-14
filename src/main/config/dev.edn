@@ -1,1 +1,2 @@
-{:taoensso.timbre/logging-config {:min-level :debug}}
+{:taoensso.timbre/logging-config {:min-level :debug}
+  :org.httpkit.server/config      {:port 3002}}

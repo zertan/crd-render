@@ -29,7 +29,7 @@
                        (= name (-> % (:spec) (:names) (:kind)))) crds)))
 
 
-(defstate oc :start (k8s/client "https://api.gxmpox00.westeurope.aroapp.io:6443" {:token "sha256~4bjpSqXTXfLneLJBRj6n29gFLZ5bg9CMP63c1_WY56c"}))
+(defstate oc :start (k8s/client "https://api.dev-ocp.agronod.com:6443" {:token "sha256~2sr-c_S9Ji_9dHGNxasP_iEizaaH-KdnIahU17SiPCQ"}))
 
 (defstate crds :start (get-crds oc))
 
